@@ -1,7 +1,86 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .cell {
+        width: 100px;
+        height: 100px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 24px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+</style>
 <div class="container mt-5">
     <h1>{{ game }}</h1>
+    <div class="row">
+        {% for cell in game.board %}
+            <div id="cell-{{ forloop.counter }}" class="col-4 cell" onclick="chooseCell({{ forloop.counter }})">
+                {% if cell == '-' %}
+                    &nbsp;
+                {% else %}
+                    {{ cell }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 </div>
+<div id="message"></div>
+<script>
+    var boardState = "{{ game.board }}";
+    console.log('desde javascript');
+    console.log(boardState);
+    var gameEnded = false;
+
+    function chooseCell(cell_id) {
+        var cell = document.querySelector(".cell:nth-child(" + cell_id + ")");
+        var symbolAtPosition = boardState.charAt(cell_id - 1);
+
+        if (symbolAtPosition === "-") {
+            $.ajax({
+                    type: "POST",
+                    url: "{% url 'game_controller' %}",
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'game_id': "{{ game.id }}",
+                        'cell_election': cell_id,
+                    },
+                    success: function(data) {
+                        update_cell_content(cell_id, data.symbol);
+                        if (data.is_win){
+                            gameEnded = true;
+                            displayMessage("El ganador es " + data.winner);
+                            blockBoard();
+                        } else if(data.is_draw){
+                            gameEnded = true;
+                            displayMessage("Resultado final: Empate");
+                            blockBoard();
+                        }
+                    }
+                });
+            }
+        }
+
+        function update_cell_content(cell_id, symbol) {
+            var cell = document.getElementById('cell-' + cell_id);
+            cell.textContent = symbol;
+        }
+
+        function displayMessage(message) {
+            var messageElement = document.getElementById("message");
+            messageElement.textContent = message;
+        }
+
+        function blockBoard() {
+            var cells = document.querySelectorAll(".cell");
+            for (var i = 0; i < cells.length; i++) {
+                var symbolAtPosition = boardState.charAt(i);
+                if (symbolAtPosition === "-") {
+                    cells[i].onclick = null;
+                }
+            }
+        }
+</script>
+
 {% endblock %}
