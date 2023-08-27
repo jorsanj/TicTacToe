@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .cell {
+        width: 100px;
+        height: 100px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 24px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2>PARTIDAS FINALIZADAS</h2>
+    <ul class="list-group mt-3">
+        {% for game in games %}
+            <li class="list-group-item">
+                <h4>{{ game }}</h4>
+                <p> Resultado:
+                    {% if game.winner %}
+                        Ganador -> {{ game.winner.user.username }}
+                    {% else %}
+                        empate
+                    {% endif %}
+                </p>
+                <p>Tablero final:</p>
+                <div class="row">
+                    {% for cell in game.board %}
+                        <div class="col-4 cell">
+                            {% if cell == '-' %}
+                                &nbsp;
+                            {% else %}
+                                {{ cell }}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

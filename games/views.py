@@ -91,3 +91,8 @@ def check_win(board, symbol):
         if all(board[i] == symbol for i in line):
             return True
     return False
+
+
+def view_games(request):
+    games = Game.objects.filter(status=1)
+    return render(request, 'view_games.html', {'games': games})
