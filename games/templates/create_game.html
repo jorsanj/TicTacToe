@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Crear partida</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="player1">Jugador 1 (X): </label>
+            <select class="form-control" id="player1" name="player1" onchange="checkPlayers()">
+                <option value="">Escoja un jugador</option>
+                {% for player in players %}
+                    <option value="{{ player.id }}">{{ player.user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="player2">Jugador 2 (O): </label>
+            <select class="form-control" id="player2" name="player2" onchange="checkPlayers()">
+                <option value="">Escoja un jugador</option>
+                {% for player in players %}
+                    {% if player.user.id != player1_id %}
+                        <option value="{{ player.id }}">{{ player.user.username }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="startButton" disabled>Iniciar</button>
+    </form>
+</div>
+
+<script>
+    function checkPlayers() {
+        var player1 = document.getElementById("player1").value;
+        var player2 = document.getElementById("player2").value;
+        var startButton = document.getElementById("startButton");
+
+        if (player1 !== "" && player2 !== "" && player1 !== player2) {
+            startButton.removeAttribute("disabled");
+        } else {
+            startButton.setAttribute("disabled", "true");
+        }
+    }
+</script>
+
+{% endblock %}
