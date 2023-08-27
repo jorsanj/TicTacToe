@@ -1,3 +1,4 @@
+from django.db.models import Count, Q, F
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
@@ -96,3 +97,20 @@ def check_win(board, symbol):
 def view_games(request):
     games = Game.objects.filter(status=1)
     return render(request, 'view_games.html', {'games': games})
+
+
+def players_stats(request):
+    players = Player.objects.annotate(
+        wins_as_p1=Count('games_p1', filter=Q(games_p1__winner=F('id')), distinct=True),
+        wins_as_p2=Count('games_p2', filter=Q(games_p2__winner=F('id')), distinct=True),
+        draws_as_p1=Count('games_p1', filter=Q(games_p1__winner_id__isnull=True) & Q(games_p1__status=1),
+                          distinct=True),
+        draws_as_p2=Count('games_p2', filter=Q(games_p2__winner_id__isnull=True) & Q(games_p2__status=1),
+                          distinct=True),
+        defeats_as_p1=Count('games_p1', filter=Q(games_p1__winner_id__isnull=False) & ~Q(games_p1__winner=F('id')),
+                            distinct=True),
+        defeats_as_p2=Count('games_p2', filter=Q(games_p2__winner_id__isnull=False) & ~Q(games_p2__winner=F('id')),
+                            distinct=True)
+    )
+
+    return HttpResponse('Plantilla visualizacion no implementada.')
